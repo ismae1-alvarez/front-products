@@ -1,9 +1,29 @@
-import { Link } from "react-router-dom";
+import { ActionFunctionArgs, Form, Link, redirect, useActionData } from "react-router-dom";
+import ErrorMessage from "../components/ErrorMessage";
+import { addProduct } from "../services/ProductService";
 
 
 
+export async function action({request}:ActionFunctionArgs){
+  const data = Object.fromEntries(await request.formData());
+
+  let error = '';
+
+  if(Object.values(data).includes('')) error = 'Todos los capos son obligatorios';
+
+  if(error.length) return error;
+
+  await addProduct(data);
+
+
+  return redirect('/');
+};
 
 const NewProduct = () => {
+  const error =  useActionData() as string;
+
+
+
   return (
     <>
       <div className="flex justify-between">
@@ -17,8 +37,8 @@ const NewProduct = () => {
           Regresar a Productos
         </Link>
       </div>
-
-      <form className="mt-10">
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      <Form className="mt-10" method="POST">
         <div className="mb-4">
           <label className="text-gray-800" htmlFor="name">
             Nombre Producto:
@@ -48,7 +68,7 @@ const NewProduct = () => {
           className="mt-5 w-full bg-indigo-600 p-2 text-white font-bold text-lg cursor-pointer rounded"
           value="Registrar Producto"
         />
-      </form>
+      </Form>
     </>
   );
 };
